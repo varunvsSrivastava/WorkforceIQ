@@ -1,0 +1,21 @@
+# Data manipulation
+pandas
+numpy
+
+# Data visualization
+matplotlib
+seaborn
+
+# Machine learning
+scikit-learn
+
+# API and dashboard
+fastapi
+uvicorn
+streamlit
+
+# Experiment tracking
+mlflow
+
+# Testing
+pytest
