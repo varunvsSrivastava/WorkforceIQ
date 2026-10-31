@@ -1,6 +1,7 @@
 # Python cache files
 __pycache__/
 *.py[cod]
+*.pyo
 
 # Virtual environment
 .venv/
@@ -29,3 +30,16 @@ htmlcov/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Raw datasets
+data/raw/*
+!data/raw/.gitkeep
+
+# Processed datasets
+data/processed/*
+!data/processed/.gitkeep
+
+# Generated models
+models/*
+!models/.gitkeep
+

@@ -1,0 +1,106 @@
+WORKFORCEIQ - DATASET PROFILE
+========================================
+
+1. Dataset Information
+Rows: 1470
+Columns: 35
+
+2. Data Types
+Age                         int64
+Attrition                     str
+BusinessTravel                str
+DailyRate                   int64
+Department                    str
+DistanceFromHome            int64
+Education                   int64
+EducationField                str
+EmployeeCount               int64
+EmployeeNumber              int64
+EnvironmentSatisfaction     int64
+Gender                        str
+HourlyRate                  int64
+JobInvolvement              int64
+JobLevel                    int64
+JobRole                       str
+JobSatisfaction             int64
+MaritalStatus                 str
+MonthlyIncome               int64
+MonthlyRate                 int64
+NumCompaniesWorked          int64
+Over18                        str
+OverTime                      str
+PercentSalaryHike           int64
+PerformanceRating           int64
+RelationshipSatisfaction    int64
+StandardHours               int64
+StockOptionLevel            int64
+TotalWorkingYears           int64
+TrainingTimesLastYear       int64
+WorkLifeBalance             int64
+YearsAtCompany              int64
+YearsInCurrentRole          int64
+YearsSinceLastPromotion     int64
+YearsWithCurrManager        int64
+
+3. Missing Values
+Age                         0
+Attrition                   0
+BusinessTravel              0
+DailyRate                   0
+Department                  0
+DistanceFromHome            0
+Education                   0
+EducationField              0
+EmployeeCount               0
+EmployeeNumber              0
+EnvironmentSatisfaction     0
+Gender                      0
+HourlyRate                  0
+JobInvolvement              0
+JobLevel                    0
+JobRole                     0
+JobSatisfaction             0
+MaritalStatus               0
+MonthlyIncome               0
+MonthlyRate                 0
+NumCompaniesWorked          0
+Over18                      0
+OverTime                    0
+PercentSalaryHike           0
+PerformanceRating           0
+RelationshipSatisfaction    0
+StandardHours               0
+StockOptionLevel            0
+TotalWorkingYears           0
+TrainingTimesLastYear       0
+WorkLifeBalance             0
+YearsAtCompany              0
+YearsInCurrentRole          0
+YearsSinceLastPromotion     0
+YearsWithCurrManager        0
+
+4. Duplicate Records
+0
+
+5. Target Distribution
+Attrition
+No     1233
+Yes     237
+
+6. Numerical Statistics
+               Age    DailyRate  DistanceFromHome    Education  EmployeeCount  EmployeeNumber  EnvironmentSatisfaction   HourlyRate  JobInvolvement     JobLevel  JobSatisfaction  MonthlyIncome   MonthlyRate  NumCompaniesWorked  PercentSalaryHike  PerformanceRating  RelationshipSatisfaction  StandardHours  StockOptionLevel  TotalWorkingYears  TrainingTimesLastYear  WorkLifeBalance  YearsAtCompany  YearsInCurrentRole  YearsSinceLastPromotion  YearsWithCurrManager
+count  1470.000000  1470.000000       1470.000000  1470.000000         1470.0     1470.000000              1470.000000  1470.000000     1470.000000  1470.000000      1470.000000    1470.000000   1470.000000         1470.000000        1470.000000        1470.000000               1470.000000         1470.0       1470.000000        1470.000000            1470.000000      1470.000000     1470.000000         1470.000000              1470.000000           1470.000000
+mean     36.923810   802.485714          9.192517     2.912925            1.0     1024.865306                 2.721769    65.891156        2.729932     2.063946         2.728571    6502.931293  14313.103401            2.693197          15.209524           3.153741                  2.712245           80.0          0.793878          11.279592               2.799320         2.761224        7.008163            4.229252                 2.187755              4.123129
+std       9.135373   403.509100          8.106864     1.024165            0.0      602.024335                 1.093082    20.329428        0.711561     1.106940         1.102846    4707.956783   7117.786044            2.498009           3.659938           0.360824                  1.081209            0.0          0.852077           7.780782               1.289271         0.706476        6.126525            3.623137                 3.222430              3.568136
+min      18.000000   102.000000          1.000000     1.000000            1.0        1.000000                 1.000000    30.000000        1.000000     1.000000         1.000000    1009.000000   2094.000000            0.000000          11.000000           3.000000                  1.000000           80.0          0.000000           0.000000               0.000000         1.000000        0.000000            0.000000                 0.000000              0.000000
+25%      30.000000   465.000000          2.000000     2.000000            1.0      491.250000                 2.000000    48.000000        2.000000     1.000000         2.000000    2911.000000   8047.000000            1.000000          12.000000           3.000000                  2.000000           80.0          0.000000           6.000000               2.000000         2.000000        3.000000            2.000000                 0.000000              2.000000
+50%      36.000000   802.000000          7.000000     3.000000            1.0     1020.500000                 3.000000    66.000000        3.000000     2.000000         3.000000    4919.000000  14235.500000            2.000000          14.000000           3.000000                  3.000000           80.0          1.000000          10.000000               3.000000         3.000000        5.000000            3.000000                 1.000000              3.000000
+75%      43.000000  1157.000000         14.000000     4.000000            1.0     1555.750000                 4.000000    83.750000        3.000000     3.000000         4.000000    8379.000000  20461.500000            4.000000          18.000000           3.000000                  4.000000           80.0          1.000000          15.000000               3.000000         3.000000        9.000000            7.000000                 3.000000              7.000000
+max      60.000000  1499.000000         29.000000     5.000000            1.0     2068.000000                 4.000000   100.000000        4.000000     5.000000         4.000000   19999.000000  26999.000000            9.000000          25.000000           4.000000                  4.000000           80.0          3.000000          40.000000               6.000000         4.000000       40.000000           18.000000                15.000000             17.000000
+
+7. Categorical Statistics
+       Attrition BusinessTravel              Department EducationField Gender          JobRole MaritalStatus Over18 OverTime
+count       1470           1470                    1470           1470   1470             1470          1470   1470     1470
+unique         2              3                       3              6      2                9             3      1        2
+top           No  Travel_Rarely  Research & Development  Life Sciences   Male  Sales Executive       Married      Y       No
+freq        1233           1043                     961            606    882              326           673   1470     1054

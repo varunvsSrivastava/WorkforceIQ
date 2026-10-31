@@ -20,6 +20,55 @@ WorkforceIQ is a machine learning project designed to predict employee attrition
 - pytest
 - Docker
 
+
+## Project Structure
+
+WorkforceIQ/
+│
+├── data/
+├── notebooks/
+│
+├── src/
+│   ├── data_loader.py
+│   ├── inspection/
+│   ├── preprocessing/    
+│   ├── models/           
+│   ├── pipeline/         
+│   └── api/              
+│
+├── models/
+├── reports/
+├── tests/
+│
+├── requirements.txt
+├── README.md
+└── .gitignore
+
+
+## Current Progress
+
+- Initial project setup completed.
+- IBM HR Analytics dataset loaded and inspected.
+- Dataset profile report generated.
+- Inspection utilities organized into a reusable Python package.
+
+## Running Dataset Inspection
+
+Run individual inspection modules from the project root:
+
+```bash
+python -m src.inspection.inspect_dataset
+python -m src.inspection.inspect_target
+python -m src.inspection.inspect_data_quality
+```
+
+Generate the dataset profile report:
+
+```bash
+python -m src.inspection.generate_dataset_report
+```
+
+
 ### Planned Models
 - Logistic Regression
 - Decision Tree Classifier
