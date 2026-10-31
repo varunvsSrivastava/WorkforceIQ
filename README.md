@@ -21,28 +21,53 @@ WorkforceIQ is a machine learning project designed to predict employee attrition
 - Docker
 
 
+
 ## Project Structure
 
 WorkforceIQ/
-│
 ├── data/
+│   ├── raw/
+│   └── processed/
+│
 ├── notebooks/
 │
 ├── src/
+│   ├── __init__.py
 │   ├── data_loader.py
-│   ├── inspection/
-│   ├── preprocessing/    
-│   ├── models/           
-│   ├── pipeline/         
-│   └── api/              
+│   └── inspection/
+│       ├── __init__.py
+│       ├── inspect_dataset.py
+│       ├── inspect_target.py
+│       ├── inspect_data_quality.py
+│       ├── inspect_features.py
+│       ├── inspect_statistics.py
+│       ├── inspect_categories.py
+│       ├── inspect_variance.py
+│       ├── inspect_identifiers.py
+│       └── generate_dataset_report.py
 │
 ├── models/
 ├── reports/
+│   └── dataset_profile.txt
+│
 ├── tests/
 │
+├── .gitignore
 ├── requirements.txt
-├── README.md
-└── .gitignore
+└── README.md
+
+### Planned Architecture
+
+The following components will be introduced in upcoming development phases:
+
+```text
+src/
+├── preprocessing/    # Phase 4
+├── models/           # Phase 5
+├── pipeline/         # Phase 8
+└── api/              # Phase 8
+```
+
 
 
 ## Current Progress
