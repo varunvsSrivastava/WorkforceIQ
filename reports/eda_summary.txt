@@ -1,0 +1,127 @@
+============================================================
+WORKFORCEIQ - EXPLORATORY DATA ANALYSIS REPORT
+============================================================
+
+1. DATASET OVERVIEW
+Total Records: 1470
+Total Features: 35
+
+2. ATTRITION DISTRIBUTION
+No: 1233 (83.88%)
+Yes: 237 (16.12%)
+
+3. NUMERICAL FEATURES VS ATTRITION
+            Age  MonthlyIncome  DistanceFromHome  TotalWorkingYears  YearsAtCompany  YearsInCurrentRole
+Attrition
+No         36.0         5204.0               7.0               10.0             6.0                 3.0
+Yes        32.0         3202.0               9.0                7.0             3.0                 2.0
+
+4. CATEGORICAL FEATURES VS ATTRITION
+
+BusinessTravel:
+                   Employees  Attrition Rate (%)
+BusinessTravel
+Travel_Frequently        277               24.91
+Travel_Rarely           1043               14.96
+Non-Travel               150                8.00
+
+Department:
+                        Employees  Attrition Rate (%)
+Department
+Sales                         446               20.63
+Human Resources                63               19.05
+Research & Development        961               13.84
+
+EducationField:
+                  Employees  Attrition Rate (%)
+EducationField
+Human Resources          27               25.93
+Technical Degree        132               24.24
+Marketing               159               22.01
+Life Sciences           606               14.69
+Medical                 464               13.58
+Other                    82               13.41
+
+Gender:
+        Employees  Attrition Rate (%)
+Gender
+Male          882               17.01
+Female        588               14.80
+
+JobRole:
+                           Employees  Attrition Rate (%)
+JobRole
+Sales Representative              83               39.76
+Laboratory Technician            259               23.94
+Human Resources                   52               23.08
+Sales Executive                  326               17.48
+Research Scientist               292               16.10
+Manufacturing Director           145                6.90
+Healthcare Representative        131                6.87
+Manager                          102                4.90
+Research Director                 80                2.50
+
+MaritalStatus:
+               Employees  Attrition Rate (%)
+MaritalStatus
+Single               470               25.53
+Married              673               12.48
+Divorced             327               10.09
+
+OverTime:
+          Employees  Attrition Rate (%)
+OverTime
+Yes             416               30.53
+No             1054               10.44
+
+5. CORRELATION WITH ATTRITION
+TotalWorkingYears          -0.171
+JobLevel                   -0.169
+YearsInCurrentRole         -0.161
+MonthlyIncome              -0.160
+Age                        -0.159
+YearsWithCurrManager       -0.156
+StockOptionLevel           -0.137
+YearsAtCompany             -0.134
+JobInvolvement             -0.130
+JobSatisfaction            -0.103
+EnvironmentSatisfaction    -0.103
+WorkLifeBalance            -0.064
+TrainingTimesLastYear      -0.059
+DailyRate                  -0.057
+RelationshipSatisfaction   -0.046
+YearsSinceLastPromotion    -0.033
+Education                  -0.031
+PercentSalaryHike          -0.013
+HourlyRate                 -0.007
+PerformanceRating           0.003
+MonthlyRate                 0.015
+NumCompaniesWorked          0.043
+DistanceFromHome            0.078
+
+6. STRONG FEATURE CORRELATIONS
+JobLevel            MonthlyIncome              0.950
+                    TotalWorkingYears          0.782
+PercentSalaryHike   PerformanceRating          0.774
+MonthlyIncome       TotalWorkingYears          0.773
+YearsAtCompany      YearsWithCurrManager       0.769
+                    YearsInCurrentRole         0.759
+YearsInCurrentRole  YearsWithCurrManager       0.714
+Age                 TotalWorkingYears          0.680
+TotalWorkingYears   YearsAtCompany             0.628
+YearsAtCompany      YearsSinceLastPromotion    0.618
+
+7. KEY BUSINESS INSIGHTS
+- The dataset contains an imbalanced attrition target.
+- Employees who left generally show lower median income and shorter company tenure.
+- Overtime is associated with a higher attrition rate.
+- Sales Representatives show a relatively high attrition rate.
+- Single employees show a higher attrition rate than married employees.
+- Several experience and income-related features are strongly correlated.
+
+8. MODELING CONSIDERATIONS
+- Use stratified train-test splitting because the target classes are imbalanced.
+- Evaluate precision, recall, F1-score and ROC-AUC along with accuracy.
+- Fit preprocessing and resampling operations using training data only.
+- Investigate correlated features during model comparison and interpretation.
+- Treat EDA findings as associations, not causal relationships.
