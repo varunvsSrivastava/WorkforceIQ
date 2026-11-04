@@ -12,10 +12,10 @@ DATASET_PATH = (
 
 def load_dataset() -> pd.DataFrame:
     """Load the employee attrition dataset from the raw data directory."""
-     
+
     if not DATASET_PATH.exists():
         raise FileNotFoundError(
             f"Dataset not found at: {DATASET_PATH}"
         )
-    
+
     return pd.read_csv(DATASET_PATH)

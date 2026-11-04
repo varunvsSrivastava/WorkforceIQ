@@ -47,36 +47,37 @@ WorkforceIQ/
 │   │   ├── inspect_variance.py
 │   │   ├── inspect_identifiers.py
 │   │   └── generate_dataset_report.py
-│   └── analysis/
-│       ├── __init__.py
-│       ├── attrition_distribution.py
-│       ├── numerical_distribution.py
-│       ├── numerical_vs_attrition.py
-│       ├── categorical_distribution.py
-│       ├── categorical_vs_attrition.py
-│       ├── correlation_analysis.py
-│       └── generate_eda_report.py
+│   ├── analysis/
+│   │   ├── __init__.py
+│   │   ├── attrition_distribution.py
+│   │   ├── numerical_distribution.py
+│   │   ├── numerical_vs_attrition.py
+│   │   ├── categorical_distribution.py
+│   │   ├── categorical_vs_attrition.py
+│   │   ├── correlation_analysis.py
+│   │   └── generate_eda_report.py
+│   ├── preprocessing/
+│   │   ├── __init__.py
+│   │   ├── prepare_features.py
+│   │   ├── split_data.py
+│   │   ├── encode_categorical.py
+│   │   ├── scale_numerical.py
+│   │   ├── build_preprocessor.py
+│   │   └── validate_preprocessing.py
+│   ├── pipeline/
+│   │   └── build_pipeline.py
+│   ├── api/
+|
 ├── models/
 ├── reports/
 │   ├── figures/
 │   ├── dataset_profile.txt
-│   └── eda_summary.txt
+│   ├── eda_summary.txt
+│   └── preprocessing_summary.txt
 ├── tests/
 ├── .gitignore
 ├── requirements.txt
 └── README.md
-```
-
-### Planned Architecture
-
-The following components will be introduced in upcoming development phases:
-
-```text
-src/
-├── preprocessing/    # Phase 4
-├── models/           # Phase 5
-├── pipeline/         # Phase 8
-└── api/              # Phase 8
 ```
 
 ## Dataset
@@ -95,12 +96,14 @@ The raw dataset is maintained locally and excluded from Git tracking.
 ## Current Progress
 
 ### Phase 1: Project Setup
+
 - Project structure created.
 - Python virtual environment configured.
 - Dependencies installed.
 - Git and GitHub repository configured.
 
 ### Phase 2: Dataset Loading and Understanding
+
 - IBM HR Analytics dataset loaded.
 - Dataset structure and data types inspected.
 - Missing values and duplicate records analyzed.
@@ -108,6 +111,7 @@ The raw dataset is maintained locally and excluded from Git tracking.
 - Dataset profile report generated.
 
 ### Phase 3: Exploratory Data Analysis (EDA)
+
 - Employee attrition distribution analyzed.
 - Numerical feature distributions visualized.
 - Numerical features compared against attrition.
@@ -116,6 +120,18 @@ The raw dataset is maintained locally and excluded from Git tracking.
 - Correlation matrix and heatmap generated.
 - EDA summary report generated.
 - Six EDA visualizations saved for documentation.
+
+### Phase 4: Data Preprocessing & Feature Engineering
+
+- Administrative and identifier features excluded.
+- Predictor features classified into numerical, ordinal, and nominal categories.
+- Target variable encoded into binary values.
+- Stratified train-test split implemented.
+- Numerical scaling and nominal encoding implemented.
+- Reusable `ColumnTransformer` constructed.
+- Preprocessing integrated with classifiers through `Pipeline`.
+- Transformed datasets validated.
+- Initial class imbalance strategy established.
 
 ## Exploratory Data Analysis
 
@@ -171,7 +187,7 @@ These findings represent statistical associations within the dataset and do not 
 
 ## Running the Project
 
-Run commands from the project root directory.
+Run commands from the project root directory with the virtual environment activated.
 
 ### Dataset Inspection
 
@@ -206,33 +222,58 @@ Generate the EDA summary report:
 python -m src.analysis.generate_eda_report
 ```
 
-## Planned Models
+### Data Preprocessing
 
-- Logistic Regression
-- Decision Tree Classifier
-- Random Forest Classifier
-- Gradient Boosting Classifier
+Execute the stratified train-test split:
 
-## Modeling Considerations
+```bash
+python -m src.preprocessing.split_data
+```
 
-- Use stratified train-test splitting to preserve class distribution.
-- Evaluate models using precision, recall, F1-score, confusion matrix, and ROC-AUC alongside accuracy.
-- Fit preprocessing operations using training data only.
-- Investigate class imbalance and feature relationships during model development.
-- Compare models using consistent evaluation procedures.
+The preprocessing components can also be imported and reused programmatically:
 
-## Future Development
+```python
+from src.preprocessing.prepare_features import prepare_features
+from src.preprocessing.build_preprocessor import build_preprocessor
+from src.pipeline.build_pipeline import build_pipeline
+```
 
-- Data preprocessing and feature engineering.
-- Classification model development and comparison.
-- Hyperparameter tuning and cross-validation.
-- Feature importance and model explainability.
-- Reusable prediction pipeline.
-- FastAPI backend.
-- Streamlit analytics dashboard.
-- MLflow experiment tracking.
-- Automated testing and Docker deployment.
+The preprocessing pipeline is designed to fit transformations using training data only and apply the same transformations to unseen data.
 
-## Disclaimer
+## Phase 4: Preprocessing Summary
 
-This project is intended for educational and analytical purposes. Predictions should not be used as the sole basis for employment decisions.
+### Feature Selection
+
+Excluded administrative and identifier columns:
+
+- EmployeeNumber
+- EmployeeCount
+- Over18
+- StandardHours
+
+Retained 30 predictor features.
+
+### Feature Classification
+
+| Feature Type | Count |
+|---|---:|
+| Numerical | 14 |
+| Ordinal | 9 |
+| Nominal | 7 |
+| Total | 30 |
+
+### Train-Test Split
+
+- Training samples: 1,176 (80%)
+- Testing samples: 294 (20%)
+- Random state: 42
+- Stratification: Enabled
+
+The original attrition distribution was preserved across both subsets.
+
+### Preprocessing Strategy
+
+| Feature Type | Transformation |
+|---|---|
+| Numerical | StandardScaler |
+| Nominal | OneHotEncoder
