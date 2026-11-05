@@ -277,3 +277,35 @@ The original attrition distribution was preserved across both subsets.
 |---|---|
 | Numerical | StandardScaler |
 | Nominal | OneHotEncoder
+
+## Phase 5: Model Development & Evaluation
+
+### Models Evaluated
+- Logistic Regression
+- Decision Tree
+- Random Forest
+- Gradient Boosting
+
+### Evaluation Workflow
+- Baseline model evaluation using classification metrics
+- Stratified 5-fold cross-validation
+- Hyperparameter tuning using GridSearchCV
+- Out-of-fold probability generation
+- F1-based classification threshold optimization
+- Held-out test evaluation at default and optimized thresholds
+
+### Final Candidate Model
+- **Model:** Random Forest
+- **Optimized Threshold:** 0.2400
+- **Test ROC-AUC:** 0.8046
+- **Test Precision:** 44.62%
+- **Test Recall:** 61.70%
+- **Test F1-score:** 51.79%
+- **Test Accuracy:** 81.63%
+
+Random Forest with the optimized threshold demonstrated improved attrition detection compared with the default threshold of 0.50.
+
+### Evaluation Report
+Detailed evaluation results, cross-validation analysis, tuning results, threshold optimization, and model selection rationale are available in:
+
+`reports/model_evaluation_report.md`
