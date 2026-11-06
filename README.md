@@ -333,4 +333,133 @@ An employee from the test dataset was selected for individual prediction and exp
 | Predicted Attrition | Yes |
 | Attrition Probability | 0.5200 |
 | Classification Threshold | 0.2400 |
-|
+| Prediction Outcome | False Positive |
+
+![Individual Employee SHAP Waterfall](reports/figures/employee_shap_waterfall.png)
+
+The SHAP waterfall explains how individual feature contributions move the predicted probability away from the baseline.
+
+The individual SHAP explanation approximately reconstructed the predicted probability, with an additivity difference of 0.0002.
+
+### 6. Explainability Report
+
+The detailed explainability analysis, global feature comparisons, individual employee explanation, and limitations are documented in:
+
+`reports/explainability_report.md`
+
+## Explainability Limitations
+
+- Feature importance does not establish causal relationships.
+- SHAP values describe model behavior rather than employee motivations.
+- Correlated features can distribute importance across multiple features.
+- Permutation importance depends on the evaluation dataset and metric.
+- Individual explanations represent specific observations and are not necessarily representative of all employees.
+- Attrition predictions should not be treated as definitive judgments about individual employees.
+- Dataset patterns may not generalize to every organization.
+
+## Running the Project
+
+Run commands from the project root directory with the virtual environment activated.
+
+### Dataset Inspection
+
+```bash
+python -m src.inspection.inspect_dataset
+python -m src.inspection.inspect_target
+python -m src.inspection.inspect_data_quality
+```
+
+Generate the dataset profile:
+
+```bash
+python -m src.inspection.generate_dataset_report
+```
+
+### Exploratory Data Analysis
+
+Run individual analysis modules:
+
+```bash
+python -m src.analysis.attrition_distribution
+python -m src.analysis.numerical_distribution
+python -m src.analysis.numerical_vs_attrition
+python -m src.analysis.categorical_distribution
+python -m src.analysis.categorical_vs_attrition
+python -m src.analysis.correlation_analysis
+```
+
+Generate the EDA summary report:
+
+```bash
+python -m src.analysis.generate_eda_report
+```
+
+### Data Preprocessing
+
+Execute the stratified train-test split:
+
+```bash
+python -m src.preprocessing.split_data
+```
+
+The preprocessing components can also be imported and reused programmatically:
+
+```python
+from src.preprocessing.prepare_features import prepare_features
+from src.preprocessing.build_preprocessor import build_preprocessor
+from src.pipeline.build_pipeline import build_pipeline
+```
+
+The preprocessing pipeline is designed to fit transformations using training data only and apply the same transformations to unseen data.
+
+### Model Explainability
+
+Run Random Forest feature importance analysis:
+
+```bash
+python -m src.analysis.analyze_feature_importance
+python -m src.analysis.plot_feature_importance
+```
+
+Run permutation importance analysis:
+
+```bash
+python -m src.analysis.analyze_permutation_importance
+python -m src.analysis.plot_permutation_importance
+```
+
+Run SHAP analysis:
+
+```bash
+python -m src.analysis.analyze_shap
+python -m src.analysis.plot_shap_summary
+python -m src.analysis.plot_shap_waterfall
+```
+
+Compare global feature importance:
+
+```bash
+python -m src.analysis.compare_feature_importance
+python -m src.analysis.plot_global_feature_importance
+```
+
+Generate an individual employee prediction:
+
+```bash
+python -m src.analysis.predict_employee
+```
+
+Generate an individual employee SHAP explanation:
+
+```bash
+python -m src.analysis.explain_employee
+```
+
+## Future Development
+
+- FastAPI prediction service.
+- Input validation and prediction schemas.
+- Streamlit prediction interface.
+- API-dashboard integration.
+- End-to-end prediction testing.
+- Docker-based deployment.
