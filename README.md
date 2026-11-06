@@ -3,7 +3,7 @@
 
 WorkforceIQ is an end-to-end machine learning project designed to predict employee attrition and analyze factors associated with employees leaving an organization.
 
-The project focuses on building classification models, identifying relevant employee patterns, evaluating model performance, and developing an interactive analytics application.
+The project focuses on building classification models, identifying relevant employee patterns, evaluating model performance, interpreting model predictions, and developing an interactive analytics application.
 
 ## Objectives
 
@@ -11,6 +11,7 @@ The project focuses on building classification models, identifying relevant empl
 - Identify factors associated with employee attrition.
 - Evaluate model performance using appropriate classification metrics.
 - Develop a reusable prediction pipeline.
+- Interpret model predictions using explainability techniques.
 - Build an interactive analytics dashboard.
 
 ## Technology Stack
@@ -19,6 +20,7 @@ The project focuses on building classification models, identifying relevant empl
 - pandas and NumPy
 - scikit-learn
 - Matplotlib and Seaborn
+- SHAP
 - MLflow
 - FastAPI
 - Streamlit
@@ -37,43 +39,41 @@ WorkforceIQ/
 │   ├── __init__.py
 │   ├── data_loader.py
 │   ├── inspection/
-│   │   ├── __init__.py
-│   │   ├── inspect_dataset.py
-│   │   ├── inspect_target.py
-│   │   ├── inspect_data_quality.py
-│   │   ├── inspect_features.py
-│   │   ├── inspect_statistics.py
-│   │   ├── inspect_categories.py
-│   │   ├── inspect_variance.py
-│   │   ├── inspect_identifiers.py
-│   │   └── generate_dataset_report.py
 │   ├── analysis/
-│   │   ├── __init__.py
 │   │   ├── attrition_distribution.py
 │   │   ├── numerical_distribution.py
 │   │   ├── numerical_vs_attrition.py
 │   │   ├── categorical_distribution.py
 │   │   ├── categorical_vs_attrition.py
 │   │   ├── correlation_analysis.py
-│   │   └── generate_eda_report.py
+│   │   ├── generate_eda_report.py
+│   │   ├── analyze_feature_importance.py
+│   │   ├── plot_feature_importance.py
+│   │   ├── analyze_permutation_importance.py
+│   │   ├── plot_permutation_importance.py
+│   │   ├── analyze_shap.py
+│   │   ├── plot_shap_summary.py
+│   │   ├── plot_shap_waterfall.py
+│   │   ├── compare_feature_importance.py
+│   │   ├── plot_global_feature_importance.py
+│   │   ├── predict_employee.py
+│   │   └── explain_employee.py
 │   ├── preprocessing/
-│   │   ├── __init__.py
-│   │   ├── prepare_features.py
-│   │   ├── split_data.py
-│   │   ├── encode_categorical.py
-│   │   ├── scale_numerical.py
-│   │   ├── build_preprocessor.py
-│   │   └── validate_preprocessing.py
 │   ├── pipeline/
 │   │   └── build_pipeline.py
-│   ├── api/
-|
+│   └── api/
 ├── models/
 ├── reports/
 │   ├── figures/
 │   ├── dataset_profile.txt
 │   ├── eda_summary.txt
-│   └── preprocessing_summary.txt
+│   ├── preprocessing_summary.txt
+│   ├── model_evaluation_report.md
+│   ├── explainability_report.md
+│   ├── random_forest_feature_importance.csv
+│   ├── permutation_importance.csv
+│   ├── shap_values.csv
+│   └── global_feature_importance_comparison.csv
 ├── tests/
 ├── .gitignore
 ├── requirements.txt
@@ -133,6 +133,30 @@ The raw dataset is maintained locally and excluded from Git tracking.
 - Transformed datasets validated.
 - Initial class imbalance strategy established.
 
+### Phase 5: Model Development & Evaluation
+
+- Logistic Regression, Decision Tree, Random Forest, and Gradient Boosting evaluated.
+- Baseline model evaluation completed.
+- Stratified 5-fold cross-validation performed.
+- Hyperparameter tuning using GridSearchCV completed.
+- Out-of-fold probability generation implemented.
+- F1-based classification threshold optimization completed.
+- Held-out test evaluation performed at default and optimized thresholds.
+- Random Forest selected as the final candidate model.
+
+### Phase 6: Explainability & Model Interpretation
+
+- Random Forest feature importance analyzed using Mean Decrease in Impurity (MDI).
+- Permutation importance calculated using ROC-AUC scoring.
+- SHAP values generated for global model interpretation.
+- SHAP summary and waterfall visualizations generated.
+- Global feature importance compared across MDI, permutation importance, and SHAP.
+- Original feature importance aggregated from transformed features.
+- Individual employee attrition predictions generated.
+- Individual employee SHAP explanations implemented.
+- SHAP additivity validated against predicted probabilities.
+- Explainability report generated with findings, visualizations, and limitations.
+
 ## Exploratory Data Analysis
 
 ### 1. Employee Attrition Distribution
@@ -185,61 +209,6 @@ The Pearson correlation heatmap highlights relationships between numerical featu
 
 These findings represent statistical associations within the dataset and do not establish causal relationships.
 
-## Running the Project
-
-Run commands from the project root directory with the virtual environment activated.
-
-### Dataset Inspection
-
-```bash
-python -m src.inspection.inspect_dataset
-python -m src.inspection.inspect_target
-python -m src.inspection.inspect_data_quality
-```
-
-Generate the dataset profile:
-
-```bash
-python -m src.inspection.generate_dataset_report
-```
-
-### Exploratory Data Analysis
-
-Run individual analysis modules:
-
-```bash
-python -m src.analysis.attrition_distribution
-python -m src.analysis.numerical_distribution
-python -m src.analysis.numerical_vs_attrition
-python -m src.analysis.categorical_distribution
-python -m src.analysis.categorical_vs_attrition
-python -m src.analysis.correlation_analysis
-```
-
-Generate the EDA summary report:
-
-```bash
-python -m src.analysis.generate_eda_report
-```
-
-### Data Preprocessing
-
-Execute the stratified train-test split:
-
-```bash
-python -m src.preprocessing.split_data
-```
-
-The preprocessing components can also be imported and reused programmatically:
-
-```python
-from src.preprocessing.prepare_features import prepare_features
-from src.preprocessing.build_preprocessor import build_preprocessor
-from src.pipeline.build_pipeline import build_pipeline
-```
-
-The preprocessing pipeline is designed to fit transformations using training data only and apply the same transformations to unseen data.
-
 ## Phase 4: Preprocessing Summary
 
 ### Feature Selection
@@ -276,36 +245,92 @@ The original attrition distribution was preserved across both subsets.
 | Feature Type | Transformation |
 |---|---|
 | Numerical | StandardScaler |
-| Nominal | OneHotEncoder
+| Nominal | OneHotEncoder |
+| Ordinal | Passthrough |
 
 ## Phase 5: Model Development & Evaluation
 
 ### Models Evaluated
+
 - Logistic Regression
 - Decision Tree
 - Random Forest
 - Gradient Boosting
 
 ### Evaluation Workflow
-- Baseline model evaluation using classification metrics
-- Stratified 5-fold cross-validation
-- Hyperparameter tuning using GridSearchCV
-- Out-of-fold probability generation
-- F1-based classification threshold optimization
-- Held-out test evaluation at default and optimized thresholds
+
+- Baseline model evaluation using classification metrics.
+- Stratified 5-fold cross-validation.
+- Hyperparameter tuning using GridSearchCV.
+- Out-of-fold probability generation.
+- F1-based classification threshold optimization.
+- Held-out test evaluation at default and optimized thresholds.
 
 ### Final Candidate Model
-- **Model:** Random Forest
-- **Optimized Threshold:** 0.2400
-- **Test ROC-AUC:** 0.8046
-- **Test Precision:** 44.62%
-- **Test Recall:** 61.70%
-- **Test F1-score:** 51.79%
-- **Test Accuracy:** 81.63%
+
+| Metric | Value |
+|---|---:|
+| Model | Random Forest |
+| Optimized Threshold | 0.2400 |
+| Test ROC-AUC | 0.8046 |
+| Test Precision | 44.62% |
+| Test Recall | 61.70% |
+| Test F1-score | 51.79% |
+| Test Accuracy | 81.63% |
 
 Random Forest with the optimized threshold demonstrated improved attrition detection compared with the default threshold of 0.50.
 
 ### Evaluation Report
+
 Detailed evaluation results, cross-validation analysis, tuning results, threshold optimization, and model selection rationale are available in:
 
 `reports/model_evaluation_report.md`
+
+## Phase 6: Explainability & Model Interpretation
+
+### 1. Random Forest Feature Importance
+
+Mean Decrease in Impurity (MDI) was used to analyze feature importance within the trained Random Forest.
+
+![Random Forest Feature Importance](reports/figures/random_forest_feature_importance.png)
+
+### 2. Permutation Importance
+
+Permutation importance evaluates the impact of feature shuffling on model ROC-AUC.
+
+![Permutation Importance](reports/figures/permutation_importance.png)
+
+OverTime emerged as the strongest predictive signal according to permutation importance.
+
+### 3. SHAP Explainability
+
+SHAP values were used to interpret global feature contributions and individual employee predictions.
+
+![SHAP Summary](reports/figures/shap_summary.png)
+
+### 4. Global Attrition Drivers
+
+Feature importance rankings were compared across MDI, permutation importance, and SHAP.
+
+![Global Feature Importance Comparison](reports/figures/global_feature_importance_comparison.png)
+
+Key observations:
+
+- OverTime consistently appeared as a strong predictive signal.
+- MonthlyIncome and Age were prominent in MDI and SHAP.
+- StockOptionLevel and MaritalStatus showed relatively high permutation and SHAP importance.
+- JobRole showed substantial SHAP contributions but comparatively low permutation importance.
+
+Different importance methods measure different aspects of model behavior, so their rankings are not expected to match exactly.
+
+### 5. Individual Employee Explanation
+
+An employee from the test dataset was selected for individual prediction and explanation.
+
+| Attribute | Value |
+|---|---:|
+| Actual Attrition | No |
+| Predicted Attrition | Yes |
+| Attrition Probability | 0.5200 |
+| Classification Threshold | 0.2400 |
+|
