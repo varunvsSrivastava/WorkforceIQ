@@ -21,3 +21,4 @@ mlflow
 pytest
 
 shap
+joblib

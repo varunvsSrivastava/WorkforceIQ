@@ -455,6 +455,58 @@ Generate an individual employee SHAP explanation:
 python -m src.analysis.explain_employee
 ```
 
+
+## Phase 7: Deployment & Application
+
+### Deployment Architecture
+
+WorkforceIQ uses a separate frontend and backend architecture:
+
+- **Backend:** FastAPI
+- **Frontend:** Streamlit
+- **ML Pipeline:** Scikit-learn preprocessing and Random Forest
+- **Model Artifact:** `models/workforceiq_pipeline.joblib`
+- **API Communication:** HTTP requests using the Requests library
+
+### Application Features
+
+- Employee information form with 30 predictor features
+- Real-time attrition prediction
+- Attrition probability visualization
+- Low, Moderate, and High risk categorization
+- Classification threshold display
+- Employee profile summary
+- Risk interpretation and responsible-use guidance
+- API error handling and input validation
+
+### API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | API information |
+| GET | `/health` | API health check |
+| POST | `/predict` | Employee attrition prediction |
+
+Interactive API documentation is available at `/docs`.
+
+### Model Deployment
+
+- Tuned Random Forest trained on the complete dataset
+- Classification threshold: 0.24
+- Model and preprocessing pipeline serialized using Joblib
+
+### Testing
+
+- API health verification
+- Valid prediction request
+- Invalid categorical input validation
+- Classification threshold unit tests
+- Streamlit and FastAPI integration
+- API connection failure handling
+
+Threshold classification tests: **3 passed**
+
+
 ## Future Development
 
 - FastAPI prediction service.
