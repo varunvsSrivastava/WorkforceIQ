@@ -1,7 +1,7 @@
 """Streamlit frontend for WorkforceIQ."""
 import requests
 import streamlit as st
-
+import os
 # Page configuration
 st.set_page_config(
     page_title="WorkforceIQ",
@@ -291,7 +291,10 @@ if predict_button:
         "YearsWithCurrManager": years_with_curr_manager,
     }
 
-    API_URL = "http://127.0.0.1:8000/predict"
+    API_URL = os.getenv(
+        "API_URL",
+        "http://127.0.0.1:8000/predict"
+    )
 
     try:
         response = requests.post(
