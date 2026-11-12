@@ -582,25 +582,72 @@ docker compose down
 
 ### Deployment Platform
 
-WorkforceIQ is being prepared for deployment using Render.
+WorkforceIQ is successfully deployed on Render.
 
 ### Deployment Architecture
 
-The cloud deployment uses two independent services:
+The cloud deployment consists of two independent services:
 
-- **Backend Service:** FastAPI API deployed using the backend Dockerfile.
+- **Backend Service:** FastAPI prediction API deployed using the backend Dockerfile.
 - **Frontend Service:** Streamlit dashboard deployed using the frontend Dockerfile.
 - **Communication:** Streamlit communicates with the deployed FastAPI service through the `API_URL` environment variable.
+- **Model Artifact:** The trained Random Forest pipeline is loaded by the backend during startup.
+- **Infrastructure:** Both services are containerized and deployed independently on Render.
 
 ### Deployment Workflow
 
 - Dockerfiles configured for Render deployment.
-- Backend and frontend deployment configurations prepared.
-- Backend deployment and health verification.
-- Frontend deployment and API integration verification.
-- Cloud prediction workflow validation.
+- Backend and frontend deployment configurations completed.
+- FastAPI backend deployed and health verified.
+- Streamlit frontend deployed successfully.
+- Frontend-backend API integration verified.
+- Cloud prediction workflow validated successfully.
+- Live employee attrition prediction verified through the deployed dashboard.
 
-The production service URLs and deployment verification results will be documented after successful deployment.
+## Live Deployment
+
+WorkforceIQ is deployed on Render.
+
+| Service | URL |
+|---|---|
+| Streamlit Dashboard | https://workforceiq-frontend.onrender.com |
+| FastAPI Backend | https://workforceiq-api-prod.onrender.com |
+| API Documentation | https://workforceiq-api-prod.onrender.com/docs |
+| Health Check | https://workforceiq-api-prod.onrender.com/health |
+
+### Production Validation
+
+The deployed application was successfully validated.
+
+| Component | Status |
+|---|---|
+| FastAPI Backend | Healthy |
+| Model Loading | Verified |
+| Streamlit Frontend | Live |
+| API Integration | Working |
+| Cloud Prediction | Successful |
+
+### Live Prediction Example
+
+A sample employee prediction was successfully generated through the deployed dashboard.
+
+| Attribute | Result |
+|---|---|
+| Prediction | Likely to Stay |
+| Attrition Probability | 8.79% |
+| Risk Level | Low |
+| Classification Threshold | 24% |
+| Model | Random Forest |
+
+The prediction was classified as *Likely to Stay* because the estimated attrition probability was below the configured classification threshold.
+
+### Deployment Notes
+
+- Render free-tier services may spin down after inactivity, resulting in cold-start delays.
+- The first API request after inactivity may take longer than subsequent requests.
+- The application uses the configured classification threshold of 0.24.
+- Predictions represent model estimates and should not be interpreted as definitive employee outcomes.
+
 
 ## Future Development
 
