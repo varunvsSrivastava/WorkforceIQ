@@ -1,4 +1,5 @@
 # WorkforceIQ
+
 ## Employee Attrition Prediction and Analytics
 
 WorkforceIQ is an end-to-end machine learning project designed to predict employee attrition and analyze factors associated with employees leaving an organization.
@@ -13,6 +14,7 @@ The project focuses on building classification models, identifying relevant empl
 - Develop a reusable prediction pipeline.
 - Interpret model predictions using explainability techniques.
 - Build an interactive analytics dashboard.
+- Deploy the application using containerization.
 
 ## Technology Stack
 
@@ -26,6 +28,8 @@ The project focuses on building classification models, identifying relevant empl
 - Streamlit
 - pytest
 - Docker
+- Docker Compose
+- Git and GitHub
 
 ## Project Structure
 
@@ -62,7 +66,12 @@ WorkforceIQ/
 │   ├── pipeline/
 │   │   └── build_pipeline.py
 │   └── api/
+│       ├── main.py
+│       └── prediction.py
+├── frontend/
+│   └── app.py
 ├── models/
+│   └── workforceiq_pipeline.joblib
 ├── reports/
 │   ├── figures/
 │   ├── dataset_profile.txt
@@ -75,6 +84,10 @@ WorkforceIQ/
 │   ├── shap_values.csv
 │   └── global_feature_importance_comparison.csv
 ├── tests/
+├── Dockerfile
+├── Dockerfile.frontend
+├── docker-compose.yml
+├── .dockerignore
 ├── .gitignore
 ├── requirements.txt
 └── README.md
@@ -82,7 +95,7 @@ WorkforceIQ/
 
 ## Dataset
 
-**IBM HR Analytics Employee Attrition & Performance Dataset**
+### IBM HR Analytics Employee Attrition & Performance Dataset
 
 - Records: 1,470 employees
 - Features: 35 columns
@@ -455,7 +468,6 @@ Generate an individual employee SHAP explanation:
 python -m src.analysis.explain_employee
 ```
 
-
 ## Phase 7: Deployment & Application
 
 ### Deployment Architecture
@@ -506,12 +518,103 @@ Interactive API documentation is available at `/docs`.
 
 Threshold classification tests: **3 passed**
 
+## Phase 8: Docker Deployment
+
+### Docker Architecture
+
+WorkforceIQ is containerized using Docker:
+
+- FastAPI backend container
+- Streamlit frontend container
+- Docker Compose orchestration
+- Internal Docker networking for frontend-backend communication
+- FastAPI health endpoint for API health verification
+- Container restart policies for service recovery
+
+### Docker Deployment
+
+Build and start the application:
+
+```bash
+docker compose up --build -d
+```
+
+Application URLs:
+
+| Component | URL |
+|---|---|
+| Streamlit Dashboard | http://localhost:8501 |
+| FastAPI Backend | http://localhost:8000 |
+| API Documentation | http://localhost:8000/docs |
+| API Health | http://localhost:8000/health |
+
+### Container Management
+
+Check container status:
+
+```bash
+docker compose ps
+```
+
+View application logs:
+
+```bash
+docker compose logs -f
+```
+
+Stop the application:
+
+```bash
+docker compose down
+```
+
+### Docker Validation
+
+- API container startup verified.
+- API health endpoint verified.
+- Frontend container startup verified.
+- Docker networking validated.
+- Dashboard prediction verified.
+- Containerized prediction output validated.
+- API connection between containers verified.
+
+## Phase 9: Cloud Deployment
+
+### Deployment Platform
+
+WorkforceIQ is being prepared for deployment using Render.
+
+### Deployment Architecture
+
+The cloud deployment uses two independent services:
+
+- **Backend Service:** FastAPI API deployed using the backend Dockerfile.
+- **Frontend Service:** Streamlit dashboard deployed using the frontend Dockerfile.
+- **Communication:** Streamlit communicates with the deployed FastAPI service through the `API_URL` environment variable.
+
+### Deployment Workflow
+
+- Dockerfiles configured for Render deployment.
+- Backend and frontend deployment configurations prepared.
+- Backend deployment and health verification.
+- Frontend deployment and API integration verification.
+- Cloud prediction workflow validation.
+
+The production service URLs and deployment verification results will be documented after successful deployment.
 
 ## Future Development
 
-- FastAPI prediction service.
-- Input validation and prediction schemas.
-- Streamlit prediction interface.
-- API-dashboard integration.
-- End-to-end prediction testing.
-- Docker-based deployment.
+- Complete cloud deployment using Render.
+- Production deployment validation.
+- Continuous integration and deployment.
+- Application monitoring and logging.
+- Further model performance improvements.
+- Additional prediction analytics and visualizations.
+
+## Responsible Use
+
+WorkforceIQ is an educational machine learning project intended for employee attrition analysis.
+
+Predictions represent statistical patterns learned from historical data and should not be used as the sole basis for employment decisions.
+
+The model does not establish causality or determine employee intent. Its predictions should be interpreted carefully, with consideration of dataset limitations, potential bias, and organizational context.
