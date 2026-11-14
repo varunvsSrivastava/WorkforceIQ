@@ -71,6 +71,14 @@ class EmployeeInput(BaseModel):
     OverTime: Literal["Yes", "No"]
 
 
+
+class FeatureContribution(BaseModel):
+    """SHAP contribution for an individual feature."""
+
+    feature: str
+    impact: float
+
+
 class PredictionResponse(BaseModel):
     """Prediction response returned by WorkforceIQ API."""
 
@@ -78,3 +86,5 @@ class PredictionResponse(BaseModel):
     attrition_probability: float = Field(ge=0, le=1)
     classification_threshold: float
     model_name: str
+    feature_contributions: list[FeatureContribution]
+
