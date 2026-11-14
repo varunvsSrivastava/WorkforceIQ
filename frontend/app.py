@@ -1,89 +1,278 @@
-"""Streamlit frontend for WorkforceIQ."""
+
+"""WorkforceIQ Streamlit application."""
+
+import os
+
+import plotly.graph_objects as go
 import requests
 import streamlit as st
-import os
-# Page configuration
+
+
+# ---------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------
+
+API_URL = os.getenv(
+    "API_URL",
+    "https://workforceiq-api-prod.onrender.com/predict",
+)
+
 st.set_page_config(
     page_title="WorkforceIQ",
     page_icon="📊",
     layout="wide",
 )
 
-# Dashboard header
+
+# ---------------------------------------------------------
+# Live Prediction Charts
+# ---------------------------------------------------------
+
+def render_prediction_charts(probability, threshold):
+    """Render live attrition probability charts."""
+
+    # Risk classification
+    if probability < 0.20:
+        risk_category = "Low"
+        risk_color = "#22c55e"
+    elif probability < 0.50:
+        risk_category = "Medium"
+        risk_color = "#f59e0b"
+    else:
+        risk_category = "High"
+        risk_color = "#ef4444"
+
+    # Risk category
+    st.subheader("Employee Attrition Risk")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric(
+            "Attrition Probability",
+            f"{probability:.2%}",
+        )
+
+        st.metric(
+            "Classification Threshold",
+            f"{threshold:.2%}",
+        )
+
+        st.markdown(
+            f"""
+            <div style="
+                background-color:{risk_color};
+                padding:12px;
+                border-radius:10px;
+                text-align:center;
+                color:white;
+                font-weight:bold;
+                font-size:20px;
+            ">
+                {risk_category} Risk
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with col2:
+        # Attrition probability gauge
+        gauge = go.Figure(
+            go.Indicator(
+                mode="gauge+number",
+                value=probability * 100,
+                number={"suffix": "%"},
+                title={"text": "Attrition Risk"},
+                gauge={
+                    "axis": {"range": [0, 100]},
+                    "bar": {"color": risk_color},
+                    "steps": [
+                        {
+                            "range": [0, 20],
+                            "color": "#dcfce7",
+                        },
+                        {
+                            "range": [20, 50],
+                            "color": "#fef3c7",
+                        },
+                        {
+                            "range": [50, 100],
+                            "color": "#fee2e2",
+                        },
+                    ],
+                },
+            )
+        )
+
+        gauge.update_layout(
+            template="plotly_dark",
+            height=300,
+            margin=dict(l=20, r=20, t=50, b=20),
+        )
+
+        st.plotly_chart(
+            gauge,
+            use_container_width=True,
+        )
+
+    # Stay vs Leave probability
+    st.subheader("Stay vs Leave Probability")
+
+    stay_probability = 1 - probability
+
+    donut = go.Figure(
+        go.Pie(
+            labels=["Stay", "Leave"],
+            values=[
+                stay_probability,
+                probability,
+            ],
+            hole=0.65,
+            marker={
+                "colors": [
+                    "#22c55e",
+                    "#ef4444",
+                ]
+            },
+            textinfo="label+percent",
+        )
+    )
+
+    donut.update_layout(
+        template="plotly_dark",
+        height=350,
+        showlegend=True,
+        margin=dict(l=20, r=20, t=30, b=20),
+    )
+
+    st.plotly_chart(
+        donut,
+        use_container_width=True,
+    )
+
+
+# ---------------------------------------------------------
+# SHAP Explainability Chart
+# ---------------------------------------------------------
+
+def render_shap_chart(feature_contributions):
+    """Render employee-specific SHAP feature contributions."""
+
+    if not feature_contributions:
+        st.info(
+            "SHAP explanations are not available "
+            "for this prediction."
+        )
+        return
+
+    # Sort by absolute impact
+    contributions = sorted(
+        feature_contributions,
+        key=lambda item: abs(item["impact"]),
+    )
+
+    # Clean feature names
+    features = [
+        item["feature"]
+        .replace("num__", "")
+        .replace("nom__", "")
+        .replace("ord__", "")
+        for item in contributions
+    ]
+
+    impacts = [
+        item["impact"]
+        for item in contributions
+    ]
+
+    # Positive SHAP increases attrition risk
+    colors = [
+        "#ef4444" if impact > 0 else "#22c55e"
+        for impact in impacts
+    ]
+
+    fig = go.Figure(
+        go.Bar(
+            x=impacts,
+            y=features,
+            orientation="h",
+            marker_color=colors,
+            hovertemplate=(
+                "<b>%{y}</b><br>"
+                "SHAP impact: %{x:.4f}"
+                "<extra></extra>"
+            ),
+        )
+    )
+
+    fig.update_layout(
+        title="Top 10 Attrition Risk Drivers",
+        xaxis_title="SHAP Impact on Attrition Probability",
+        yaxis_title="Employee Features",
+        template="plotly_dark",
+        height=500,
+        margin=dict(
+            l=20,
+            r=20,
+            t=60,
+            b=40,
+        ),
+        showlegend=False,
+        xaxis=dict(
+            zeroline=True,
+            zerolinewidth=2,
+        ),
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True,
+    )
+
+    st.caption(
+        "Red: increases attrition risk | "
+        "Green: decreases attrition risk"
+    )
+
+
+# ---------------------------------------------------------
+# Application Header
+# ---------------------------------------------------------
+
 st.title("WorkforceIQ")
-st.subheader("Employee Attrition Prediction & Analytics")
+st.caption(
+    "Employee Attrition Prediction & Analytics"
+)
 
 st.markdown(
     """
-    Predict employee attrition using a Machine Learning model.
-    Enter employee information below to generate an attrition prediction.
+    Predict employee attrition probability and understand
+    the factors influencing individual employee risk.
     """
 )
 
 st.divider()
 
-# Employee input form
-st.header("Employee Information")
+
+# ---------------------------------------------------------
+# Employee Input
+# ---------------------------------------------------------
+
+st.subheader("Employee Information")
 
 with st.form("employee_prediction_form"):
 
-    st.subheader("Personal Information")
-
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        age = st.number_input(
+        Age = st.number_input(
             "Age",
             min_value=18,
             max_value=60,
-            value=35,
+            value=30,
         )
 
-    with col2:
-        gender = st.selectbox(
-            "Gender",
-            ["Male", "Female"],
-        )
-
-    with col3:
-        marital_status = st.selectbox(
-            "Marital Status",
-            ["Single", "Married", "Divorced"],
-            index=1,
-        )
-
-    st.subheader("Job Information")
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        department = st.selectbox(
-            "Department",
-            [
-                "Research & Development",
-                "Sales",
-                "Human Resources",
-            ],
-        )
-
-    with col2:
-        job_role = st.selectbox(
-            "Job Role",
-            [
-                "Research Scientist",
-                "Laboratory Technician",
-                "Manufacturing Director",
-                "Healthcare Representative",
-                "Manager",
-                "Sales Executive",
-                "Sales Representative",
-                "Research Director",
-                "Human Resources",
-            ],
-        )
-
-    with col3:
-        business_travel = st.selectbox(
+        BusinessTravel = st.selectbox(
             "Business Travel",
             [
                 "Travel_Rarely",
@@ -92,63 +281,34 @@ with st.form("employee_prediction_form"):
             ],
         )
 
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        job_level = st.selectbox(
-            "Job Level",
-            [1, 2, 3, 4, 5],
-            index=1,
-        )
-
-    with col2:
-        monthly_income = st.number_input(
-            "Monthly Income",
+        DailyRate = st.number_input(
+            "Daily Rate",
             min_value=1,
-            value=5000,
+            value=1000,
         )
 
-    with col3:
-        overtime = st.selectbox(
-            "OverTime",
-            ["No", "Yes"],
+        Department = st.selectbox(
+            "Department",
+            [
+                "Sales",
+                "Research & Development",
+                "Human Resources",
+            ],
         )
 
-    st.subheader("Work Environment")
+        DistanceFromHome = st.number_input(
+            "Distance From Home",
+            min_value=1,
+            value=10,
+        )
 
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        environment_satisfaction = st.selectbox(
-            "Environment Satisfaction",
-            [1, 2, 3, 4],
+        Education = st.selectbox(
+            "Education",
+            [1, 2, 3, 4, 5],
             index=2,
         )
 
-    with col2:
-        job_satisfaction = st.selectbox(
-            "Job Satisfaction",
-            [1, 2, 3, 4],
-            index=2,
-        )
-
-    with col3:
-        work_life_balance = st.selectbox(
-            "Work Life Balance",
-            [1, 2, 3, 4],
-            index=2,
-        )
-        
-    
-    st.subheader("Education & Professional Details")
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        education = st.selectbox("Education", [1, 2, 3, 4, 5])
-
-    with col2:
-        education_field = st.selectbox(
+        EducationField = st.selectbox(
             "Education Field",
             [
                 "Life Sciences",
@@ -160,248 +320,272 @@ with st.form("employee_prediction_form"):
             ],
         )
 
-    with col3:
-        job_involvement = st.selectbox(
-            "Job Involvement", [1, 2, 3, 4]
-        )
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        performance_rating = st.selectbox(
-            "Performance Rating", [3, 4]
-        )
-
     with col2:
-        relationship_satisfaction = st.selectbox(
-            "Relationship Satisfaction", [1, 2, 3, 4]
+        EnvironmentSatisfaction = st.selectbox(
+            "Environment Satisfaction",
+            [1, 2, 3, 4],
+            index=2,
+        )
+
+        Gender = st.selectbox(
+            "Gender",
+            ["Male", "Female"],
+        )
+
+        HourlyRate = st.number_input(
+            "Hourly Rate",
+            min_value=1,
+            value=65,
+        )
+
+        JobInvolvement = st.selectbox(
+            "Job Involvement",
+            [1, 2, 3, 4],
+            index=2,
+        )
+
+        JobLevel = st.selectbox(
+            "Job Level",
+            [1, 2, 3, 4, 5],
+            index=0,
+        )
+
+        JobRole = st.selectbox(
+            "Job Role",
+            [
+                "Sales Executive",
+                "Research Scientist",
+                "Laboratory Technician",
+                "Manufacturing Director",
+                "Healthcare Representative",
+                "Manager",
+                "Sales Representative",
+                "Research Director",
+                "Human Resources",
+            ],
+        )
+
+        JobSatisfaction = st.selectbox(
+            "Job Satisfaction",
+            [1, 2, 3, 4],
+            index=2,
         )
 
     with col3:
-        stock_option_level = st.selectbox(
-            "Stock Option Level", [0, 1, 2, 3]
+        MaritalStatus = st.selectbox(
+            "Marital Status",
+            ["Single", "Married", "Divorced"],
         )
 
-    st.subheader("Compensation & Work Details")
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        daily_rate = st.number_input("Daily Rate", min_value=1, value=1100)
-
-    with col2:
-        hourly_rate = st.number_input("Hourly Rate", min_value=1, value=65)
-
-    with col3:
-        monthly_rate = st.number_input("Monthly Rate", min_value=1, value=15000)
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        distance_from_home = st.number_input(
-            "Distance From Home", min_value=1, value=10
+        MonthlyIncome = st.number_input(
+            "Monthly Income",
+            min_value=1,
+            value=5000,
         )
 
-    with col2:
-        total_working_years = st.number_input(
-            "Total Working Years", min_value=0, value=10
+        MonthlyRate = st.number_input(
+            "Monthly Rate",
+            min_value=1,
+            value=15000,
         )
 
-    with col3:
-        num_companies_worked = st.number_input(
-            "Number of Companies Worked", min_value=0, value=2
+        NumCompaniesWorked = st.number_input(
+            "Number of Companies Worked",
+            min_value=0,
+            value=2,
         )
 
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        percent_salary_hike = st.number_input(
-            "Percent Salary Hike", min_value=0, max_value=100, value=15
+        OverTime = st.selectbox(
+            "OverTime",
+            ["Yes", "No"],
         )
 
-    with col2:
-        training_times_last_year = st.number_input(
-            "Training Times Last Year", min_value=0, value=3
+        PercentSalaryHike = st.number_input(
+            "Percent Salary Hike",
+            min_value=0,
+            max_value=100,
+            value=15,
         )
 
-    with col3:
-        years_at_company = st.number_input(
-            "Years at Company", min_value=0, value=5
+        PerformanceRating = st.selectbox(
+            "Performance Rating",
+            [3, 4],
         )
 
-    st.subheader("Career Progression")
+    # Remaining employee attributes
+    col4, col5, col6 = st.columns(3)
 
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        years_in_current_role = st.number_input(
-            "Years in Current Role", min_value=0, value=3
+    with col4:
+        RelationshipSatisfaction = st.selectbox(
+            "Relationship Satisfaction",
+            [1, 2, 3, 4],
+            index=2,
         )
 
-    with col2:
-        years_since_last_promotion = st.number_input(
-            "Years Since Last Promotion", min_value=0, value=1
+        StockOptionLevel = st.selectbox(
+            "Stock Option Level",
+            [0, 1, 2, 3],
         )
 
-    with col3:
-        years_with_curr_manager = st.number_input(
-            "Years With Current Manager", min_value=0, value=3
+        TotalWorkingYears = st.number_input(
+            "Total Working Years",
+            min_value=0,
+            value=8,
         )
 
+    with col5:
+        TrainingTimesLastYear = st.number_input(
+            "Training Times Last Year",
+            min_value=0,
+            value=2,
+        )
 
-    predict_button = st.form_submit_button(
+        WorkLifeBalance = st.selectbox(
+            "Work Life Balance",
+            [1, 2, 3, 4],
+            index=2,
+        )
+
+        YearsAtCompany = st.number_input(
+            "Years At Company",
+            min_value=0,
+            value=5,
+        )
+
+    with col6:
+        YearsInCurrentRole = st.number_input(
+            "Years In Current Role",
+            min_value=0,
+            value=3,
+        )
+
+        YearsSinceLastPromotion = st.number_input(
+            "Years Since Last Promotion",
+            min_value=0,
+            value=1,
+        )
+
+        YearsWithCurrManager = st.number_input(
+            "Years With Current Manager",
+            min_value=0,
+            value=3,
+        )
+
+    submitted = st.form_submit_button(
         "Predict Attrition",
         use_container_width=True,
     )
 
-    
-if predict_button:
 
-    # Prepare employee input payload
+# ---------------------------------------------------------
+# Prediction
+# ---------------------------------------------------------
+
+if submitted:
+
     employee_data = {
-        "Age": age,
-        "BusinessTravel": business_travel,
-        "DailyRate": daily_rate,
-        "Department": department,
-        "DistanceFromHome": distance_from_home,
-        "Education": education,
-        "EducationField": education_field,
-        "EnvironmentSatisfaction": environment_satisfaction,
-        "Gender": gender,
-        "HourlyRate": hourly_rate,
-        "JobInvolvement": job_involvement,
-        "JobLevel": job_level,
-        "JobRole": job_role,
-        "JobSatisfaction": job_satisfaction,
-        "MaritalStatus": marital_status,
-        "MonthlyIncome": monthly_income,
-        "MonthlyRate": monthly_rate,
-        "NumCompaniesWorked": num_companies_worked,
-        "OverTime": overtime,
-        "PercentSalaryHike": percent_salary_hike,
-        "PerformanceRating": performance_rating,
-        "RelationshipSatisfaction": relationship_satisfaction,
-        "StockOptionLevel": stock_option_level,
-        "TotalWorkingYears": total_working_years,
-        "TrainingTimesLastYear": training_times_last_year,
-        "WorkLifeBalance": work_life_balance,
-        "YearsAtCompany": years_at_company,
-        "YearsInCurrentRole": years_in_current_role,
-        "YearsSinceLastPromotion": years_since_last_promotion,
-        "YearsWithCurrManager": years_with_curr_manager,
+        "Age": Age,
+        "BusinessTravel": BusinessTravel,
+        "DailyRate": DailyRate,
+        "Department": Department,
+        "DistanceFromHome": DistanceFromHome,
+        "Education": Education,
+        "EducationField": EducationField,
+        "EnvironmentSatisfaction": EnvironmentSatisfaction,
+        "Gender": Gender,
+        "HourlyRate": HourlyRate,
+        "JobInvolvement": JobInvolvement,
+        "JobLevel": JobLevel,
+        "JobRole": JobRole,
+        "JobSatisfaction": JobSatisfaction,
+        "MaritalStatus": MaritalStatus,
+        "MonthlyIncome": MonthlyIncome,
+        "MonthlyRate": MonthlyRate,
+        "NumCompaniesWorked": NumCompaniesWorked,
+        "OverTime": OverTime,
+        "PercentSalaryHike": PercentSalaryHike,
+        "PerformanceRating": PerformanceRating,
+        "RelationshipSatisfaction": RelationshipSatisfaction,
+        "StockOptionLevel": StockOptionLevel,
+        "TotalWorkingYears": TotalWorkingYears,
+        "TrainingTimesLastYear": TrainingTimesLastYear,
+        "WorkLifeBalance": WorkLifeBalance,
+        "YearsAtCompany": YearsAtCompany,
+        "YearsInCurrentRole": YearsInCurrentRole,
+        "YearsSinceLastPromotion": YearsSinceLastPromotion,
+        "YearsWithCurrManager": YearsWithCurrManager,
     }
 
-    API_URL = os.getenv(
-        "API_URL",
-        "http://127.0.0.1:8000/predict"
-    )
-
     try:
-        response = requests.post(
-            API_URL,
-            json=employee_data,
-            timeout=30,
-        )
 
-        response.raise_for_status()
-        result = response.json()
+        with st.spinner(
+            "Analyzing employee attrition risk..."
+        ):
 
-        
-        st.divider()
-        st.header("Prediction Result")
+            response = requests.post(
+                API_URL,
+                json=employee_data,
+                timeout=120,
+            )
 
+            response.raise_for_status()
+
+            result = response.json()
+
+        # Prediction results
         probability = result["attrition_probability"]
         prediction = result["attrition_prediction"]
         threshold = result["classification_threshold"]
 
-        # Risk categorization
-        if probability < 0.10:
-            risk_level = "Low"
-            risk_color = "green"
-        elif probability < threshold:
-            risk_level = "Moderate"
-            risk_color = "orange"
-        else:
-            risk_level = "High"
-            risk_color = "red"
+        st.divider()
+        st.subheader("Prediction Results")
 
-        # Prediction summary
-        with st.container(border=True):
-            col1, col2, col3 = st.columns(3)
+        result_col1, result_col2 = st.columns(2)
 
-            with col1:
-                st.metric(
-                    "Prediction",
-                    "Likely to Leave" if prediction == "Yes" else "Likely to Stay"
-                )
-
-            with col2:
-                st.metric(
-                    "Attrition Probability",
-                    f"{probability:.2%}"
-                )
-
-            with col3:
-                st.metric("Risk Level", risk_level)
-
-            st.progress(probability)
-
-            if prediction == "Yes":
-                st.error("Employee is predicted to leave.")
-            else:
-                st.success("Employee is predicted to stay.")
-
-            st.caption(
-                f"Classification threshold: {threshold:.0%} | "
-                f"Model: {result['model_name']}"
-            )
-            
-            
-        # Risk interpretation
-        st.subheader("Risk Interpretation")
-
-        if risk_level == "Low":
-            st.success(
-                "Low Risk: The model estimates a relatively low "
-                "probability of employee attrition."
-            )
-        elif risk_level == "Moderate":
-            st.warning(
-                "Moderate Risk: The estimated attrition probability "
-                "is elevated. Consider reviewing relevant "
-                "employee engagement factors."
-            )
-        else:
-            st.error(
-                "High Risk: The estimated attrition probability "
-                "exceeds the model's classification threshold."
+        with result_col1:
+            st.metric(
+                "Predicted Attrition",
+                prediction,
             )
 
-        st.caption(
-            "This prediction is an analytical estimate, not a "
-            "certainty. Use it alongside human judgment and "
-            "employee feedback."
+        with result_col2:
+            st.metric(
+                "Attrition Probability",
+                f"{probability:.2%}",
+            )
+
+        # Live prediction charts
+        render_prediction_charts(
+            probability=probability,
+            threshold=threshold,
         )
 
+        # Individual SHAP explainability
+        st.divider()
+        st.subheader(
+            "Employee-Level Explainability"
+        )
 
-        # Employee profile summary
-        with st.expander("View Employee Profile"):
-            profile_col1, profile_col2, profile_col3 = st.columns(3)
+        render_shap_chart(
+            result.get(
+                "feature_contributions",
+                [],
+            )
+        )
 
-            with profile_col1:
-                st.write(f"**Age:** {age}")
-                st.write(f"**Gender:** {gender}")
-                st.write(f"**Marital Status:** {marital_status}")
-
-            with profile_col2:
-                st.write(f"**Department:** {department}")
-                st.write(f"**Job Role:** {job_role}")
-                st.write(f"**Job Level:** {job_level}")
-
-            with profile_col3:
-                st.write(f"**Monthly Income:** ₹{monthly_income:,}")
-                st.write(f"**OverTime:** {overtime}")
-                st.write(f"**Years at Company:** {years_at_company}")
+        st.success(
+            "Employee prediction and explanation "
+            "generated successfully."
+        )
 
     except requests.exceptions.RequestException as exc:
-        st.error(f"API request failed: {exc}")
+
+        st.error(
+            f"API request failed: {exc}"
+        )
+
+    except Exception as exc:
+
+        st.error(
+            f"Unexpected error: {exc}"
+        )
